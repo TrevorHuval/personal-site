@@ -6,6 +6,10 @@ projects showcase, a skills/experience timeline, and a photo gallery.
 **Stack:** React 19 + TypeScript + Vite + Tailwind v4, built to static files and
 served by nginx in a Docker container on trevorhuval.com. There is no backend.
 
+See [the deployment guide](DEPLOYMENT.md) for the personal site, Heardit,
+Plannit, and MusiQL: release branches, image publishing, EC2 updates, verification,
+backups, and rollback. Builds/publishing are automatic; deploying to EC2 is manual.
+
 ## Layout
 
 ```
@@ -89,7 +93,6 @@ Without it the build still succeeds — Open Graph paths stay root-relative and 
 sitemap is written, which is the honest output for a build that does not know
 where it will live.
 
-The build also writes `404.html` as a byte-for-byte copy of `index.html`. GitHub
-Pages has no rewrite rules, so that copy is the only reason a hard load of
-`/resume` boots the app instead of showing a 404 page. The response still
-carries a 404 status; that is inherent to client-side routing on Pages.
+The build also writes `404.html` as a byte-for-byte copy of `index.html` for
+compatibility with static hosts. Production uses nginx on EC2: its SPA fallback
+serves `index.html` for routes such as `/resume`, rather than relying on GitHub Pages.
