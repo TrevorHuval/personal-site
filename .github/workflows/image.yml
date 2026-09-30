@@ -54,7 +54,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   # The studio API (src/cms): password login plus content and photo storage for
-  # the hidden /studio editor. Deployed as its own service; see DEPLOYMENT.md.
+  # the hidden /studio editor. Deployed as its own service (see the private trevorhuval-infra repo).
   cms-image:
     runs-on: ubuntu-latest
     defaults:

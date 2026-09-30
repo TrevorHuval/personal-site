@@ -4,11 +4,11 @@ Trevor Huval's personal website: an About Me, resume (HTML + PDF download), a
 projects showcase, a skills/experience timeline, and a photo gallery.
 
 **Stack:** React 19 + TypeScript + Vite + Tailwind v4, built to static files and
-served by nginx in a Docker container on trevorhuval.com. There is no backend.
+served by nginx in a Docker container on trevorhuval.com. The public site is static.
+The only server-side piece is the optional owner-only `/studio` editor, whose API lives in
+[`src/cms`](src/cms/README.md) and is deployed as its own service; the site works without it.
 
-See [the deployment guide](DEPLOYMENT.md) for the personal site, Heardit,
-Plannit, and MusiQL: release branches, image publishing, EC2 updates, verification,
-backups, and rollback. Builds/publishing are automatic; deploying to EC2 is manual.
+Deployment and server operations are documented in the private `trevorhuval-infra` repo.
 
 ## Layout
 
