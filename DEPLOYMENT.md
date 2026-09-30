@@ -198,6 +198,81 @@ The two image IDs should match. Pulling an image alone does not deploy it.
 If the correct image is running but the browser looks stale, hard-refresh with
 Ctrl+Shift+R. The site's HTML revalidates; hashed assets are cached for a year.
 
+## Studio: the owner-only content editor
+
+`trevorhuval.com/studio` edits photos, captions and the site's copy without a
+commit or deploy. It is a fifth service, `site-cms` (`src/cms`, image
+`ghcr.io/trevorhuval/personal-site-cms`, published by the `cms-image` job in the
+same workflow). Nothing links to it; five quick taps on the footer's © line open
+it. Its design and security model are in [`src/cms/README.md`](src/cms/README.md).
+
+The site does not depend on it: `/api/cms/content` failing just means visitors
+get the content bundled into the site image.
+
+### One-time setup (in `trevorhuval-infra`, which this repo cannot change)
+
+1. Generate the secrets on your own machine. The password is prompted for and
+   never printed:
+
+   ```sh
+   cd src/cms && npm install && npm run hash-password -- --secret
+   ```
+
+2. Add the two printed values to `~/trevorhuval-infra/.env` on EC2 under the
+   names `STUDIO_PASSWORD_HASH` and `STUDIO_SESSION_SECRET`, single-quoted as
+   printed.
+
+3. `docker-compose.yml`: add the service and volume.
+
+   ```yaml
+     site-cms:
+       logging: *default-logging
+       image: ghcr.io/trevorhuval/personal-site-cms:latest
+       restart: unless-stopped
+       mem_limit: 768m   # a 48 MP photo decodes to ~150 MB; uploads run one at a time
+       environment:
+         PUBLIC_ORIGIN: https://${SITE_DOMAIN:-trevorhuval.com}
+         # Blank leaves the studio disabled (its endpoints answer 404).
+         ADMIN_PASSWORD_HASH: ${STUDIO_PASSWORD_HASH:-}
+         SESSION_SECRET: ${STUDIO_SESSION_SECRET:-}
+       volumes:
+         - site-data:/data
+
+   volumes:
+     site-data:
+   ```
+
+4. `Caddyfile`: route the API and uploaded photos, above the final `handle`:
+
+   ```text
+   	handle /api/cms/* {
+   		reverse_proxy site-cms:8080
+   	}
+   	handle /media/* {
+   		reverse_proxy site-cms:8080
+   	}
+   ```
+
+5. Deploy as usual (`./scripts/deploy.sh`, or `docker compose pull site-cms` and
+   `docker compose up -d --no-deps site-cms`, then `docker compose exec caddy
+   caddy reload --config /etc/caddy/Caddyfile`). The **site** image also changed
+   (the `/studio` route and content loader), so pull `site` as well.
+
+6. Verify: `curl -f https://trevorhuval.com/api/cms/health`, then open
+   `/studio` and sign in.
+
+### Operating it
+
+- **Edits are data, not code.** They live in the `site-data` volume, so they
+  survive image updates and are not in Git. Include `site-data` in
+  `scripts/backup.sh`; `docker compose down -v` deletes it.
+- **Reset to shipped version** in each tab drops that collection's edits and the
+  site returns to the JSON in the repo. While a collection is edited,
+  changing its JSON in the repo has no visible effect until it is reset.
+- **Change the password**: rerun `npm run hash-password`, update
+  `STUDIO_PASSWORD_HASH`, recreate `site-cms`. Every session is signed out.
+- **Rate limiting** is in memory; restarting `site-cms` clears lockouts. Signed-out sessions stay signed out across restarts. Sign out when you finish: the cookie is scoped to `/api/cms`, but scripts in the other apps on this domain could still use it (see `src/cms/README.md`, "Known limitation").
+
 ## Persistent data, backups, and rollback
 
 Compose named volumes retain Plannit's SQLite database, both PostgreSQL

@@ -222,7 +222,7 @@
   .album-filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-xs); }
   .album-filter { min-height: var(--control-height); padding-inline: var(--space-lg); border-radius: var(--radius-pill); color: var(--color-ink-muted); border: 1px solid var(--color-hairline-strong); font-size: var(--text-sm); transition: background-color var(--motion-fast), transform var(--motion-fast); }
   .album-filter:hover { background: var(--color-inset); }
-  .album-filter[aria-pressed='true'] { background: var(--color-action); color: var(--color-action-ink); }
+  .album-filter[aria-pressed='true'], .album-filter[aria-selected='true'] { background: var(--color-action); color: var(--color-action-ink); }
   .album-filter:active { transform: scale(var(--press-scale)); }
   .gallery-grid { columns: 3; column-gap: var(--space-lg); }
   .gallery-grid > li { break-inside: avoid; margin-bottom: var(--space-lg); }

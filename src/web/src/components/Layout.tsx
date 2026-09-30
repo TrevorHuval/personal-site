@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Nav from './Nav'
 import { GitHubIcon, LinkedInIcon } from './Icons'
 import { profile } from '../content'
@@ -70,13 +70,37 @@ function SkipLink() {
   )
 }
 
+/**
+ * The studio's front door: five quick taps on the copyright line. There is no
+ * visible affordance, and no link anywhere for a crawler or a visitor to find.
+ * The gesture only saves typing /studio on a phone; the protection is the
+ * password behind it.
+ */
+const SECRET_TAPS = 5
+const SECRET_WINDOW_MS = 2000
+
+function useStudioGesture() {
+  const navigate = useNavigate()
+  const taps = useRef<number[]>([])
+
+  return () => {
+    const now = Date.now()
+    taps.current = [...taps.current.filter((at) => now - at < SECRET_WINDOW_MS), now]
+    if (taps.current.length >= SECRET_TAPS) {
+      taps.current = []
+      navigate('/studio')
+    }
+  }
+}
+
 function SiteFooter() {
   const year = new Date().getFullYear()
+  const tap = useStudioGesture()
 
   return (
     <footer className="site-width pb-10">
       <div className="flex flex-col items-center gap-5 border-t border-hairline pt-8 sm:flex-row sm:justify-between">
-        <p className="numeric text-meta text-ink-soft">
+        <p className="numeric text-meta text-ink-soft" onClick={tap}>
           © {year} {profile.name}
         </p>
 

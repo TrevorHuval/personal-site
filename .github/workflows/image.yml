@@ -52,3 +52,44 @@ jobs:
             ghcr.io/trevorhuval/personal-site:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # The studio API (src/cms): password login plus content and photo storage for
+  # the hidden /studio editor. Deployed as its own service; see DEPLOYMENT.md.
+  cms-image:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/cms
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/cms/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: src/cms
+          file: src/cms/Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/trevorhuval/personal-site-cms:latest
+            ghcr.io/trevorhuval/personal-site-cms:${{ github.sha }}
+          cache-from: type=gha,scope=cms
+          cache-to: type=gha,mode=max,scope=cms
