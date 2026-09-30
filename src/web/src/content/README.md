@@ -31,6 +31,17 @@ To change the accent, edit `--olive-light` (dark theme) and `--olive-dark`
 timeline markers follow those tokens. `npm run test` includes contrast checks
 against the actual palette, including translucent surfaces over photos.
 
+## Edits made in the studio
+
+The owner-only editor at `/studio` (see [`src/cms`](../../../cms/README.md)) can
+save an edited copy of any of these six collections on the server. `index.ts`
+loads those copies once before the app renders and prefers them over the JSON
+here; if the server is unreachable the JSON in this folder is what visitors see.
+The JSON files therefore remain the shipped defaults and the fallback, not
+necessarily what is live. The server applies the same shape and content rules as
+`types.ts` and `content.test.ts`, so a new field must also be added to
+`src/cms/src/schema.mjs`.
+
 ## Conventions
 
 - **Dates** are strings, not timestamps: `"2024-06"` for month precision

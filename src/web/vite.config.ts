@@ -50,5 +50,11 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    // The studio API and the photos it serves. Start it with "npm run dev" in src/cms;
+    // without it the site simply falls back to its bundled content.
+    proxy: {
+      '/api/cms': 'http://localhost:8787',
+      '/media': 'http://localhost:8787',
+    },
   },
 })

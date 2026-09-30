@@ -49,3 +49,6 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
+
+# Studio API local data (uploads, saved content)
+.data/
