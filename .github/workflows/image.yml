@@ -47,6 +47,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           build-args: |
             SITE_URL=https://trevorhuval.com
+            GA_MEASUREMENT_ID=G-6GXWW2155X
           tags: |
             ghcr.io/trevorhuval/personal-site:latest
             ghcr.io/trevorhuval/personal-site:${{ github.sha }}

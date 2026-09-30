@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Nav from './Nav'
 import { GitHubIcon, LinkedInIcon } from './Icons'
 import { profile } from '../content'
+import { usePageViews } from '../lib/analytics'
 
 /**
  * Shared page width and navigation clearance come from the layout tokens.
@@ -10,6 +11,7 @@ import { profile } from '../content'
  */
 export default function Layout() {
   useScrollToTopOnNavigate()
+  usePageViews()
 
   return (
     <div className="flex min-h-screen flex-col">
