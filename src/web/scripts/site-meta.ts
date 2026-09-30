@@ -58,7 +58,7 @@ export function siteMeta(options: { dataDir: string; publicDir: string }): Plugi
       return html
         .replace(
           '</head>',
-          `  <script type="application/ld+json">${personSchema(profile, resume, description, siteUrl)}</script>${analyticsSnippet(measurementId)}\n  </head>`,
+          `  <script type="application/ld+json">${personSchema(profile, resume, description, siteUrl)}</script>${analyticsTag(measurementId)}\n  </head>`,
         )
         .replace(/%SITE_([A-Z_]+)%/g, (match, key: string) => {
           switch (key) {
@@ -79,6 +79,10 @@ export function siteMeta(options: { dataDir: string; publicDir: string }): Plugi
     },
 
     generateBundle() {
+      if (measurementId !== '') {
+        this.emitFile({ type: 'asset', fileName: GA_INIT_FILE, source: analyticsInit(measurementId) })
+      }
+
       if (siteUrl === '') return
 
       const today = new Date().toISOString().slice(0, 10)
@@ -139,7 +143,8 @@ function personSchema(
 }
 
 /**
- * Google Analytics 4 (the free tier), or nothing.
+ * Google Analytics 4 (the free tier), or nothing. The tag loads `ga-init.js`
+ * (emitted at build) rather than inlining, because production serves a strict CSP.
  *
  * The measurement ID is public by design — it ships in every visitor's page
  * source — so it is deployment config like `SITE_URL`, not a secret. Without
@@ -151,27 +156,32 @@ function personSchema(
  * - `send_page_view` is off because the SPA reports its own page views from
  *   `lib/analytics.ts` once the route's title is set (and skips `/studio`).
  */
-function analyticsSnippet(id: string): string {
-  if (id === '') return ''
+const GA_INIT_FILE = 'ga-init.js'
 
-  return `
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    if (navigator.doNotTrack !== '1' && window.doNotTrack !== '1') {
-      var s = document.createElement('script');
-      s.async = true;
-      s.src = 'https://www.googletagmanager.com/gtag/js?id=${id}';
-      document.head.appendChild(s);
-      gtag('js', new Date());
-      gtag('config', '${id}', {
-        send_page_view: false,
-        allow_google_signals: false,
-        allow_ad_personalization_signals: false
-      });
-      window.gaEnabled = true;
-    }
-  </script>`
+/** The page tag: a same-origin script, so the site's CSP needs no `unsafe-inline`. */
+function analyticsTag(id: string): string {
+  return id === '' ? '' : `
+  <script src="/${GA_INIT_FILE}"></script>`
+}
+
+/** The body of `ga-init.js`. */
+function analyticsInit(id: string): string {
+  return `window.dataLayer = window.dataLayer || [];
+function gtag() { dataLayer.push(arguments); }
+if (navigator.doNotTrack !== '1' && window.doNotTrack !== '1') {
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=${id}';
+  document.head.appendChild(s);
+  gtag('js', new Date());
+  gtag('config', '${id}', {
+    send_page_view: false,
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false
+  });
+  window.gaEnabled = true;
+}
+`
 }
 
 /** Placeholder content must never reach a crawler. */
