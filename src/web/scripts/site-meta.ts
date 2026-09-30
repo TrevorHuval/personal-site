@@ -36,12 +36,18 @@ const ROUTES = ['/', '/resume', '/projects', '/photos'] as const
 
 export function siteMeta(options: { dataDir: string; publicDir: string }): Plugin {
   let siteUrl = ''
+  let measurementId = ''
 
   return {
     name: 'site-meta',
 
     configResolved() {
       siteUrl = (process.env.SITE_URL ?? '').replace(/\/+$/, '')
+      measurementId = (process.env.GA_MEASUREMENT_ID ?? '').trim()
+
+      if (measurementId !== '' && !/^G-[A-Z0-9]{6,12}$/.test(measurementId)) {
+        throw new Error(`GA_MEASUREMENT_ID must look like G-XXXXXXXXXX, got "${measurementId}"`)
+      }
     },
 
     transformIndexHtml(html) {
@@ -52,7 +58,7 @@ export function siteMeta(options: { dataDir: string; publicDir: string }): Plugi
       return html
         .replace(
           '</head>',
-          `  <script type="application/ld+json">${personSchema(profile, resume, description, siteUrl)}</script>\n  </head>`,
+          `  <script type="application/ld+json">${personSchema(profile, resume, description, siteUrl)}</script>${analyticsSnippet(measurementId)}\n  </head>`,
         )
         .replace(/%SITE_([A-Z_]+)%/g, (match, key: string) => {
           switch (key) {
@@ -130,6 +136,42 @@ function personSchema(
     ...(sameAs.length === 0 ? {} : { sameAs }),
     ...(siteUrl === '' ? {} : { url: siteUrl, image: `${siteUrl}/og.png` }),
   })
+}
+
+/**
+ * Google Analytics 4 (the free tier), or nothing.
+ *
+ * The measurement ID is public by design — it ships in every visitor's page
+ * source — so it is deployment config like `SITE_URL`, not a secret. Without
+ * `GA_MEASUREMENT_ID` (local dev, tests) no tag is emitted at all.
+ *
+ * The privacy posture lives here rather than in a cookie banner:
+ * - a visitor sending Do Not Track never loads `gtag.js`;
+ * - Google Signals and ad personalization are off, so this is measurement only;
+ * - `send_page_view` is off because the SPA reports its own page views from
+ *   `lib/analytics.ts` once the route's title is set (and skips `/studio`).
+ */
+function analyticsSnippet(id: string): string {
+  if (id === '') return ''
+
+  return `
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    if (navigator.doNotTrack !== '1' && window.doNotTrack !== '1') {
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=${id}';
+      document.head.appendChild(s);
+      gtag('js', new Date());
+      gtag('config', '${id}', {
+        send_page_view: false,
+        allow_google_signals: false,
+        allow_ad_personalization_signals: false
+      });
+      window.gaEnabled = true;
+    }
+  </script>`
 }
 
 /** Placeholder content must never reach a crawler. */
