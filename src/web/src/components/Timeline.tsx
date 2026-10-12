@@ -1,14 +1,11 @@
-﻿import type { ExperienceEntry } from '../content/types'
+import type { ExperienceEntry } from '../content/types'
 import { formatDuration, formatRange } from '../lib/dates'
-import { Chip } from './Ui'
 
 /**
  * The rail. Roles hang off a single hairline with their dates set in the
  * left-hand margin — a contact sheet's frame numbers applied to a career.
  *
- * These entries are intentionally *not* glass cards. Stacking eight identical
- * panels flattens the page; letting the timeline read as editorial text gives
- * the surrounding glass sections something to be distinct from.
+ * Each role is a sheet card hanging off the rail; the dates stay in the margin.
  *
  * `maxHighlights` is what stops the home page from being the résumé. The current
  * role carries nine bullets, and printing all of them twice — once on the way
@@ -47,7 +44,7 @@ export default function Timeline({
 
             <div
               className={`relative pl-6 md:pl-8 ${
-                isLast ? 'pb-1' : 'border-l border-hairline pb-10'
+                isLast ? 'pb-1' : 'border-l border-hairline pb-6'
               }`}
             >
               {/* The rail stops at the last node rather than trailing into
@@ -61,9 +58,7 @@ export default function Timeline({
 
               <span
                 aria-hidden="true"
-                className={`absolute top-[0.45rem] -left-[4.5px] size-2.5 rounded-full ring-4 ring-canvas ${
-                  isCurrent ? 'bg-accent' : 'border border-hairline-strong bg-canvas'
-                }`}
+                className={`timeline-node ${isCurrent ? 'is-current' : ''}`}
               />
 
               <p className="gutter-date mb-2 md:hidden">
@@ -71,8 +66,9 @@ export default function Timeline({
                 {duration && ` · ${duration}`}
               </p>
 
-              <h3 className="text-lg font-semibold text-ink">{entry.title}</h3>
-              <p className="mt-0.5 text-sm text-ink-muted">
+              <div className="timeline-card">
+              <h3 className="card-title">{entry.title}</h3>
+              <p className="card-body mt-0.5">
                 {entry.company}
                 <span aria-hidden="true" className="mx-1.5 text-ink-faint">
                   ·
@@ -81,12 +77,12 @@ export default function Timeline({
               </p>
 
               {highlights.length > 0 && (
-                <ul className="mt-3.5 flex flex-col gap-2">
+                <ul className="mt-4 flex flex-col gap-2">
                   {highlights.map((highlight) => (
-                    <li key={highlight} className="flex gap-3 text-sm text-ink-muted">
+                    <li key={highlight} className="card-body flex gap-3">
                       <span
                         aria-hidden="true"
-                        className="mt-[0.6rem] size-1 shrink-0 rounded-full bg-ink-faint"
+                        className="bullet-dot"
                       />
                       <span>{highlight}</span>
                     </li>
@@ -103,14 +99,15 @@ export default function Timeline({
               )}
 
               {entry.tech.length > 0 && (
-                <ul className="mt-4 flex flex-wrap gap-1.5">
+                <ul className="chip-list mt-4">
                   {entry.tech.map((tech) => (
                     <li key={tech}>
-                      <Chip>{tech}</Chip>
+                      <span className="chip">{tech}</span>
                     </li>
                   ))}
                 </ul>
               )}
+              </div>
             </div>
           </li>
         )

@@ -32,17 +32,17 @@ export default function ResumePage() {
           {resume.education.map((entry) => (
             <li
               key={`${entry.institution}-${entry.startDate}`}
-              className="glass flex flex-col gap-1 rounded-card p-5"
+              className="resume-sheet flex flex-col gap-1"
             >
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                <h3 className="text-lg font-semibold text-ink">{entry.institution}</h3>
+                <h3 className="text-base font-semibold text-ink">{entry.institution}</h3>
                 <p className="gutter-date">{formatRange(entry.startDate, entry.endDate)}</p>
               </div>
-              <p className="text-sm text-ink-muted">
+              <p className="text-[0.9375rem] text-[var(--text-secondary)]">
                 {entry.degree}
                 {entry.field && `, ${entry.field}`}
               </p>
-              {entry.notes && <p className="mt-1 text-sm text-ink-soft">{entry.notes}</p>}
+              {entry.notes && <p className="mt-1 text-[0.9375rem] text-[var(--text-secondary)]">{entry.notes}</p>}
             </li>
           ))}
         </ul>
@@ -61,7 +61,7 @@ function ResumeHeader() {
       <p className="gutter-date">Resume</p>
 
       <h1>{profile.name}</h1>
-      <p className="max-w-[48ch] text-lg text-ink-muted">{profile.headline}</p>
+      <p className="max-w-[48ch] text-base text-[var(--text-secondary)]">{profile.headline}</p>
 
       <div className="flex flex-wrap items-center gap-3">
         {/* Trevor's real PDF, served straight out of the web root. It is also the

@@ -76,6 +76,10 @@ export default function PhotoImage({
       fetchPriority={eager ? 'high' : undefined}
       decoding="async"
       data-loaded={status === 'loaded'}
+      // A cached image can finish before React attaches onLoad; catch it here.
+      ref={(el) => {
+        if (el?.complete && el.naturalWidth > 0 && status === 'pending') setStatus('loaded')
+      }}
       onLoad={() => setStatus('loaded')}
       onError={() => setStatus('failed')}
       className={`photo-fade bg-inset image-edge ${className}`}

@@ -1,7 +1,6 @@
 import type { GitHubRepo, Project } from '../content/types'
 import { formatRelative } from '../lib/dates'
 import { ArrowUpRightIcon, ForkIcon, GitHubIcon, StarIcon } from './Icons'
-import { Chip } from './Ui'
 
 export type ProjectWithRepo = Project & { repo: GitHubRepo | null }
 
@@ -26,19 +25,19 @@ export default function ProjectCard({
   const { repo } = project
 
   return (
-    <article className="glass project-card group flex flex-col rounded-card transition-[transform,box-shadow] duration-200 ease-out-quint hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift-high)]">
+    <article className="project-card">
       <header className="flex flex-col gap-2">
-        <h2 className="project-title font-semibold text-ink">{project.name}</h2>
-        <p className="text-sm text-ink-muted">{project.summary}</p>
+        <h2 className="project-title">{project.name}</h2>
+        <p className="text-[var(--text-secondary)]">{project.summary}</p>
       </header>
 
-      {project.description && <p className="text-sm text-ink-soft">{project.description}</p>}
+      {project.description && <p className="text-[var(--text-secondary)]">{project.description}</p>}
 
       {project.tech.length > 0 && (
-        <ul className="flex flex-wrap gap-1.5">
+        <ul className="project-tags">
           {project.tech.map((tech) => (
-            <li key={tech}>
-              <Chip>{tech}</Chip>
+            <li key={tech} className="project-tag">
+              {tech}
             </li>
           ))}
         </ul>
@@ -48,25 +47,25 @@ export default function ProjectCard({
           however long the prose above runs. Repo stats appear only when a slug
           actually matched: absent GitHub data collapses the row rather than
           showing a line of zeroes. */}
-      <footer className="mt-auto flex flex-col gap-3 border-t border-hairline pt-4">
+      <footer className="mt-auto flex flex-col gap-3 pt-4">
         {repo && (
           <dl className="flex flex-wrap items-center gap-x-4 gap-y-2">
             {repo.language && (
               <div className="flex items-center gap-1.5">
                 <dt className="sr-only">Language</dt>
                 <span aria-hidden="true" className="size-2 rounded-full bg-accent" />
-                <dd className="text-meta text-ink-muted">{repo.language}</dd>
+                <dd className="project-stat">{repo.language}</dd>
               </div>
             )}
             <div className="flex items-center gap-1.5">
               <dt className="sr-only">Stars</dt>
               <StarIcon className="size-3.5 text-ink-faint" />
-              <dd className="numeric text-meta text-ink-muted">{repo.stars}</dd>
+              <dd className="numeric project-stat">{repo.stars}</dd>
             </div>
             <div className="flex items-center gap-1.5">
               <dt className="sr-only">Forks</dt>
               <ForkIcon className="size-3.5 text-ink-faint" />
-              <dd className="numeric text-meta text-ink-muted">{repo.forks}</dd>
+              <dd className="numeric project-stat">{repo.forks}</dd>
             </div>
             {repo.pushedAt && (
               <div className="ml-auto">
@@ -100,12 +99,7 @@ export default function ProjectCard({
 
 function CardLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      className="inline-flex items-center gap-1.5 text-meta font-medium text-ink-muted transition-colors duration-200 ease-out-quint hover:text-accent"
-    >
+    <a href={href} target="_blank" rel="noreferrer" className="action action-quiet press">
       {children}
     </a>
   )

@@ -1,5 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CloseIcon, DownloadIcon } from './Icons'
+import { useDialogMotion } from '../lib/useDialogMotion'
+import { ActionLink, IconButton } from './Ui'
 
 /** Served straight out of the web root; the one place contact details live. */
 export const RESUME_PDF = '/trevor_huval_resume.pdf'
@@ -19,28 +21,7 @@ export const RESUME_PDF = '/trevor_huval_resume.pdf'
 export default function ResumeDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null)
 
-  const onCloseRef = useRef(onClose)
-  onCloseRef.current = onClose
-
-  // The user agent can close the dialog on its own (Escape); state has to follow.
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-    const handleClose = () => {
-      onCloseRef.current()
-    }
-    dialog.addEventListener('close', handleClose)
-    return () => {
-      dialog.removeEventListener('close', handleClose)
-    }
-  }, [])
-
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-    if (open && !dialog.open) dialog.showModal()
-    else if (!open && dialog.open) dialog.close()
-  }, [open])
+  useDialogMotion(dialogRef, open, onClose)
 
   useEffect(() => {
     if (!open) return
@@ -51,6 +32,12 @@ export default function ResumeDialog({ open, onClose }: { open: boolean; onClose
     }
   }, [open])
 
+  // Nothing is mounted until it first opens, so the PDF is never fetched for a
+  // visitor who never asks for it. After that it stays mounted so the exit
+  // animation has something to fade (and reopening is instant).
+  const [everOpened, setEverOpened] = useState(open)
+  if (open && !everOpened) setEverOpened(true)
+
   return (
     <dialog
       ref={dialogRef}
@@ -59,52 +46,44 @@ export default function ResumeDialog({ open, onClose }: { open: boolean; onClose
         if (event.target === dialogRef.current) onClose()
       }}
       onKeyDown={(event) => {
-        if (event.key === 'Escape') onClose()
+        if (event.key === 'Escape') {
+          event.preventDefault()
+          onClose()
+        }
       }}
-      className="m-0 h-dvh max-h-none w-dvw max-w-none bg-transparent p-4 backdrop:bg-scrim backdrop:backdrop-blur-2xl sm:p-8"
+      className="dialog dialog-motion"
     >
-      {/* Nothing is mounted until it opens, so the PDF is never fetched for a
-          visitor who never asks for it. */}
-      {open && (
+      {everOpened && (
         <div className="pointer-events-none flex h-full w-full items-center justify-center">
           {/* Letter-page proportions capped to the viewport: on a wide screen
-              the frame is a sheet of paper, not a slab of glass. */}
+              the frame is a sheet of paper, not a slab. */}
           <div
             className="pointer-events-auto flex h-full w-full max-w-[52rem] flex-col gap-3"
             onClick={(event) => {
               event.stopPropagation()
             }}
           >
-            <div className="glass-high flex shrink-0 items-center gap-4 rounded-full py-2.5 pr-2.5 pl-5">
+            <div className="resume-bar">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-meta font-medium text-ink">Trevor Huval — Resume</p>
                 <p className="gutter-date mt-0.5 truncate">PDF · one page</p>
               </div>
-              <div className="flex shrink-0 items-center gap-1">
-                <a
-                  href={RESUME_PDF}
-                  download
-                  aria-label="Download PDF"
-                  className="flex size-10 items-center justify-center rounded-full text-ink-muted transition-[background-color,color,transform] duration-200 ease-out-quint hover:bg-inset hover:text-ink active:scale-[0.97]"
-                >
-                  <DownloadIcon className="size-[1.15rem]" />
-                </a>
-                <button
-                  type="button"
-                  aria-label="Close"
-                  onClick={onClose}
-                  className="flex size-10 items-center justify-center rounded-full text-ink-muted transition-[background-color,color,transform] duration-200 ease-out-quint hover:bg-inset hover:text-ink active:scale-[0.97]"
-                >
+              <div className="flex shrink-0 items-center gap-2">
+                <ActionLink href={RESUME_PDF} download variant="primary">
+                  <DownloadIcon className="size-4" />
+                  Download
+                </ActionLink>
+                <IconButton label="Close" onClick={onClose}>
                   <CloseIcon className="size-[1.15rem]" />
-                </button>
+                </IconButton>
               </div>
             </div>
 
-            <div className="glass-high min-h-0 flex-1 overflow-hidden rounded-panel p-2">
+            <div className="resume-frame">
               <iframe
                 src={`${RESUME_PDF}#toolbar=0&navpanes=0&view=FitH`}
                 title="Trevor Huval resume, PDF"
-                className="h-full w-full rounded-[0.75rem] bg-white"
+                className="h-full w-full rounded-[var(--r-md)] bg-white"
               />
             </div>
           </div>

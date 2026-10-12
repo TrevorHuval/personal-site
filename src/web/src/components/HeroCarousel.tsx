@@ -3,14 +3,15 @@ import { Link } from 'react-router-dom'
 import type { Photo } from '../content/types'
 import { ArrowUpRightIcon, ChevronLeftIcon, ChevronRightIcon } from './Icons'
 import PhotoImage from './PhotoImage'
+import { IconButton } from './Ui'
 
 /** Dwell per slide. Long enough to look, short enough to notice it moves. */
 const INTERVAL_MS = 5000
 
 /**
  * One frame in the hero that cycles through the gallery. Every slide is
- * rendered and stacked, with a cross-fade and a barely perceptible scale settle.
- * Only opacity and transform animate; the frame never resizes between photos.
+ * rendered and stacked and cross-fade once the slide changes. The first slide shows
+ * with no animation. Only opacity animates; the frame never resizes between photos.
  *
  * Auto-advance pauses while the pointer or keyboard focus is on it, and is
  * off entirely under `prefers-reduced-motion`; the arrows and dots always
@@ -20,6 +21,8 @@ const INTERVAL_MS = 5000
 export default function HeroCarousel({ photos }: { photos: Photo[] }) {
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
+  // Flips on the first slide change so the initial photo never fades in on load.
+  const [changed, setChanged] = useState(false)
   const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const count = photos.length
 
@@ -30,7 +33,14 @@ export default function HeroCarousel({ photos }: { photos: Photo[] }) {
     return () => preference.removeEventListener('change', update)
   }, [])
 
-  const go = (delta: number) => setIndex((current) => (current + delta + count) % count)
+  const select = (next: number) => {
+    setChanged(true)
+    setIndex(next)
+  }
+  const go = (delta: number) => {
+    setChanged(true)
+    setIndex((current) => (current + delta + count) % count)
+  }
 
   useEffect(() => {
     if (count < 2 || paused || reducedMotion) return
@@ -47,6 +57,7 @@ export default function HeroCarousel({ photos }: { photos: Photo[] }) {
   return (
     <section
       className="hero-carousel"
+      data-animate={changed}
       aria-roledescription="carousel"
       aria-label="Photos from life and travels"
       onMouseEnter={() => setPaused(true)}
@@ -76,9 +87,9 @@ export default function HeroCarousel({ photos }: { photos: Photo[] }) {
 
       {count > 1 && (
         <div className="hero-carousel-controls">
-          <button type="button" className="icon-button glass-high" aria-label="Previous photo" onClick={() => go(-1)}>
+          <IconButton label="Previous photo" onClick={() => go(-1)}>
             <ChevronLeftIcon className="size-4" />
-          </button>
+          </IconButton>
           <div className="hero-carousel-dots" role="tablist" aria-label="Choose a photo">
             {photos.map((photo, i) => (
               <button
@@ -88,13 +99,13 @@ export default function HeroCarousel({ photos }: { photos: Photo[] }) {
                 aria-selected={i === index}
                 aria-label={photo.location ?? photo.caption}
                 className={`hero-carousel-dot ${i === index ? 'is-current' : ''}`}
-                onClick={() => setIndex(i)}
+                onClick={() => select(i)}
               />
             ))}
           </div>
-          <button type="button" className="icon-button glass-high" aria-label="Next photo" onClick={() => go(1)}>
+          <IconButton label="Next photo" onClick={() => go(1)}>
             <ChevronRightIcon className="size-4" />
-          </button>
+          </IconButton>
         </div>
       )}
     </section>

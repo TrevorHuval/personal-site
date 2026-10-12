@@ -1,8 +1,10 @@
-﻿import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Photo } from '../content/types'
 import { formatDay } from '../lib/dates'
 import { ChevronLeftIcon, ChevronRightIcon, CloseIcon } from './Icons'
 import PhotoImage from './PhotoImage'
+import { useDialogMotion } from '../lib/useDialogMotion'
+import { IconButton } from './Ui'
 
 /**
  * Built on a native `<dialog>` opened with `showModal()`, which is what gives
@@ -11,7 +13,8 @@ import PhotoImage from './PhotoImage'
  *
  * What the platform does not give us and this adds: arrow-key and swipe
  * navigation, body scroll lock (the backdrop does not stop the page behind it
- * scrolling), and click-outside-to-close.
+ * scrolling), click-outside-to-close, and the open/close motion (see
+ * `useDialogMotion`).
  */
 /** How much of the viewport a photo may take, leaving room for the caption bar
  *  and the dialog's own padding. */
@@ -20,7 +23,18 @@ const MAX_HEIGHT = 'var(--lightbox-photo-height)'
 /** Below this the caption has nowhere to go, so a very tall photo in a very
  *  short window gets a caption bar wider than itself rather than an unreadable
  *  one the same width. */
-const MIN_CAPTION_WIDTH = '21rem'
+// Fixed so the caption bar holds still while browsing photos of different shapes.
+const CAPTION_WIDTH = '32rem'
+
+type Track = {
+  id: string | null
+  open: boolean
+  /** The photo that is fading out, only while a user navigation is in flight. */
+  ghost: Photo | null
+  /** Whether the current photo should fade in (navigation only, never on open). */
+  animate: boolean
+  last: Photo | null
+}
 
 export default function Lightbox({
   photos,
@@ -39,44 +53,9 @@ export default function Lightbox({
   const touchStartX = useRef<number | null>(null)
   const isOpen = index !== null
 
-  // Held in a ref so the listener below can stay attached for the component's
-  // whole life instead of being torn down on every parent render.
-  const onCloseRef = useRef(onClose)
-  onCloseRef.current = onClose
-
-  /**
-   * A modal dialog can be dismissed by the user agent itself — Escape, or the
-   * browser closing the top layer — which fires `close` on the element without
-   * going through any of our handlers. React state has to follow, or the
-   * dialog vanishes while we still believe it is open and `body` is left
-   * scroll-locked.
-   *
-   * Bound natively rather than through `onClose`: `close` does not bubble, so
-   * this sidesteps any question of how the synthetic event system routes it.
-   */
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-
-    const handleClose = () => {
-      onCloseRef.current()
-    }
-
-    dialog.addEventListener('close', handleClose)
-    return () => {
-      dialog.removeEventListener('close', handleClose)
-    }
-  }, [])
-
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-
-    // showModal() throws if the dialog is already open, and close() on a closed
-    // dialog fires a spurious 'close' event — so both are guarded.
-    if (isOpen && !dialog.open) dialog.showModal()
-    else if (!isOpen && dialog.open) dialog.close()
-  }, [isOpen])
+  // showModal(), the exit animation, and following the user agent's own
+  // close/Escape all live in the shared hook.
+  useDialogMotion(dialogRef, isOpen, onClose)
 
   useEffect(() => {
     if (!isOpen) return
@@ -89,21 +68,36 @@ export default function Lightbox({
     }
   }, [isOpen])
 
-  // The dialog element itself always stays mounted so the open/close effect
-  // above has something to act on, but there is nothing to render inside it
-  // until a photo is selected.
-  const photo = index === null ? undefined : photos[index]
-  if (index === null || photo === undefined) {
-    return <dialog ref={dialogRef} className="hidden" />
+  // The dialog stays mounted so it can animate out; the photo it last showed is
+  // held until it has finished closing, so the exit does not flash empty.
+  const [heldIndex, setHeldIndex] = useState<number | null>(index)
+  if (index !== null && heldIndex !== index) setHeldIndex(index)
+  const shownIndex = index ?? heldIndex
+  const photo = shownIndex === null ? undefined : photos[shownIndex]
+
+  // Dissolve between photos. Only a user navigation sets `ghost`; opening the
+  // lightbox never animates the photo.
+  const [track, setTrack] = useState<Track>({ id: null, open: false, ghost: null, animate: false, last: null })
+  const photoId = photo?.id ?? null
+  if (track.id !== photoId || track.open !== isOpen) {
+    const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const navigated = isOpen && track.open && track.last !== null && photo !== undefined && track.id !== photoId && !reduced
+    setTrack({
+      id: photoId,
+      open: isOpen,
+      ghost: navigated ? track.last : null,
+      animate: navigated,
+      last: photo ?? track.last,
+    })
   }
 
   const hasSiblings = photos.length > 1
-  const frameWidth = `calc(${MAX_HEIGHT} * ${photo.width} / ${photo.height})`
+  const frameWidth = photo ? `calc(${MAX_HEIGHT} * ${photo.width} / ${photo.height})` : undefined
 
   return (
     <dialog
       ref={dialogRef}
-      aria-label={`Photo ${index + 1} of ${photos.length}: ${photo.caption}`}
+      aria-label={photo && shownIndex !== null ? `Photo ${shownIndex + 1} of ${photos.length}: ${photo.caption}` : undefined}
       onClick={(event) => {
         // Only a click on the dialog box itself — the padding around the
         // figure — counts as clicking out.
@@ -118,18 +112,17 @@ export default function Lightbox({
           const last = controls[controls.length - 1]
           if (first && last && event.shiftKey && document.activeElement === first) {
             event.preventDefault()
-            last.focus()
+            last.focus({ preventScroll: true })
           } else if (first && last && !event.shiftKey && document.activeElement === last) {
             event.preventDefault()
-            first.focus()
+            first.focus({ preventScroll: true })
           }
         }
 
-        // The user agent also closes the dialog on Escape by itself. Unwinding
-        // our own state here too means the scroll lock lifts even if the
-        // resulting `close` event never reaches the listener above. Running
-        // both paths is harmless — it just sets the same state twice.
+        // Take Escape over from the user agent so the exit animation runs; the
+        // hook also handles a native `cancel` for paths that skip this.
         if (event.key === 'Escape') {
+          event.preventDefault()
           onClose()
           return
         }
@@ -155,93 +148,83 @@ export default function Lightbox({
         const delta = (event.changedTouches[0]?.clientX ?? start) - start
         if (Math.abs(delta) > 50) onNavigate(delta < 0 ? 1 : -1)
       }}
-      className="m-0 h-dvh max-h-none w-dvw max-w-none bg-transparent p-4 backdrop:bg-scrim backdrop:backdrop-blur-2xl sm:p-8"
+      className="dialog dialog-motion"
     >
-      <div className="pointer-events-none flex h-full w-full items-center justify-center">
-        {/* The frame and the caption bar hug the photo instead of stranding it
-            in a wide slab of glass — a portrait shot and a panorama each get
-            chrome cut to their own shape.
+      {photo && shownIndex !== null && (
+        <div className="pointer-events-none flex h-full w-full items-center justify-center">
+          {/* The frame and the caption bar hug the photo instead of stranding it
+              in a wide slab — a portrait shot and a panorama each get chrome cut
+              to their own shape.
 
-            The width is computed rather than left to `w-fit`, because
-            shrink-to-fit sizes a replaced element from its intrinsic width and
-            never hears about the height cap: a tall photo in a short viewport
-            would leave the frame at full width with the picture stranded down
-            one edge. Deriving the width from the height cap and the photo's own
-            ratio is the same answer in both directions. */}
-        <figure
-          style={{ width: `min(100%, max(${MIN_CAPTION_WIDTH}, ${frameWidth}))` }}
-          className="pointer-events-auto flex max-h-full flex-col items-center gap-3"
-          onClick={(event) => {
-            event.stopPropagation()
-          }}
-        >
-          <div
-            style={{ width: `min(100%, ${frameWidth})` }}
-            className="glass-high overflow-hidden rounded-panel p-2"
+              The width is computed rather than left to `w-fit`, because
+              shrink-to-fit sizes a replaced element from its intrinsic width and
+              never hears about the height cap: a tall photo in a short viewport
+              would leave the frame at full width with the picture stranded down
+              one edge. Deriving the width from the height cap and the photo's own
+              ratio is the same answer in both directions. */}
+          <figure
+            className="flex w-full max-h-full flex-col items-center gap-3"
+            onClick={(event) => {
+              event.stopPropagation()
+            }}
           >
-            <PhotoImage
-              key={photo.id}
-              src={photo.src}
-              avif={photo.srcAvif}
-              alt={photo.caption}
-              width={photo.width}
-              height={photo.height}
-              eager
-              className="w-full rounded-card"
-            />
-          </div>
-
-          <figcaption className="glass-high lightbox-caption">
-            <div className="lightbox-caption-copy">
-              <p className="text-meta font-medium text-ink">{photo.location ?? photo.album}</p>
-              {photo.date && <p className="gutter-date mt-0.5">{formatDay(photo.date)}</p>}
+            <div style={{ width: `min(100%, ${frameWidth})` }} className="lightbox-frame pointer-events-auto">
+              <div className="relative">
+                <div key={photo.id} className={track.animate ? 'lightbox-photo-in' : undefined}>
+                  <PhotoImage
+                    src={photo.src}
+                    avif={photo.srcAvif}
+                    alt={photo.caption}
+                    width={photo.width}
+                    height={photo.height}
+                    eager
+                    className="lightbox-photo w-full"
+                  />
+                </div>
+                {track.ghost && (
+                  <img
+                    key={track.ghost.id}
+                    src={track.ghost.src}
+                    alt=""
+                    aria-hidden="true"
+                    className="lightbox-photo lightbox-photo-out"
+                    onAnimationEnd={() => setTrack((current) => ({ ...current, ghost: null }))}
+                  />
+                )}
+              </div>
             </div>
 
-            {hasSiblings && (
-              <span className="numeric shrink-0 font-mono text-caption text-ink-faint">
-                {index + 1} / {photos.length}
-              </span>
-            )}
+            <figcaption style={{ width: `min(100%, ${CAPTION_WIDTH})` }} className="lightbox-caption pointer-events-auto">
+              <div className="lightbox-caption-copy">
+                <p className="text-meta font-medium text-ink">{photo.location ?? photo.album}</p>
+                {photo.date && <p className="gutter-date mt-0.5">{formatDay(photo.date)}</p>}
+              </div>
 
-            <div className="flex shrink-0 items-center gap-1">
               {hasSiblings && (
-                <>
-                  <ChromeButton label="Previous photo" onClick={() => onNavigate(-1)}>
-                    <ChevronLeftIcon className="size-[1.15rem]" />
-                  </ChromeButton>
-                  <ChromeButton label="Next photo" onClick={() => onNavigate(1)}>
-                    <ChevronRightIcon className="size-[1.15rem]" />
-                  </ChromeButton>
-                </>
+                <span className="numeric shrink-0 font-mono text-caption text-ink-faint">
+                  {shownIndex + 1} / {photos.length}
+                </span>
               )}
-              <ChromeButton label="Close" onClick={onClose}>
-                <CloseIcon className="size-[1.15rem]" />
-              </ChromeButton>
-            </div>
-          </figcaption>
-        </figure>
-      </div>
-    </dialog>
-  )
-}
 
-function ChromeButton({
-  label,
-  onClick,
-  children,
-}: {
-  label: string
-  onClick: () => void
-  children: React.ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={onClick}
-      className="icon-button"
-    >
-      {children}
-    </button>
+              <div className="flex shrink-0 items-center gap-1">
+                {hasSiblings && (
+                  <>
+                    <IconButton label="Previous photo" onClick={() => onNavigate(-1)}>
+                      <ChevronLeftIcon className="size-[1.15rem]" />
+                    </IconButton>
+                    <IconButton label="Next photo" onClick={() => onNavigate(1)}>
+                      <ChevronRightIcon className="size-[1.15rem]" />
+                    </IconButton>
+                  </>
+                )}
+                <IconButton label="Close" onClick={onClose}>
+                  <CloseIcon className="size-[1.15rem]" />
+                </IconButton>
+              </div>
+            </figcaption>
+          </figure>
+        </div>
+      )}
+    </dialog>
   )
 }
