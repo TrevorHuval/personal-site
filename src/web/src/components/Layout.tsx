@@ -55,7 +55,7 @@ function useScrollToTopOnNavigate() {
 /**
  * The first stop on a keyboard tab through the site. It parks off-screen rather
  * than being display:none, so it stays focusable; landing focus drops it into
- * place as the same glass pill the nav is made of.
+ * place as the same sheet pill the nav is made of (see .skip-link in shell.css).
  *
  * Keyed to `:focus` rather than `:focus-visible`: parked off-screen it can only
  * ever be reached by keyboard, and the one keyboard affordance on the page is
@@ -65,7 +65,7 @@ function SkipLink() {
   return (
     <a
       href="#content"
-      className="glass-high fixed top-4 left-4 z-50 -translate-y-24 rounded-full px-5 py-2.5 text-meta font-medium text-ink transition-transform duration-200 ease-out-quint focus:translate-y-0"
+      className="skip-link"
     >
       Skip to content
     </a>
@@ -102,7 +102,7 @@ function SiteFooter() {
   return (
     <footer className="site-width pb-10">
       <div className="flex flex-col items-center gap-5 border-t border-hairline pt-8 sm:flex-row sm:justify-between">
-        <p className="numeric text-meta text-ink-soft" onClick={tap}>
+        <p className="numeric text-caption text-ink-soft" onClick={tap}>
           © {year} {profile.name}
         </p>
 
@@ -135,7 +135,7 @@ function FooterLink({
         aria-label={label}
         target="_blank"
         rel="me noreferrer"
-        className="icon-button"
+        className="icon-button press"
       >
         {children}
       </a>

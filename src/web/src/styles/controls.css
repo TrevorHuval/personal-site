@@ -1,0 +1,40 @@
+/* Controls: buttons, icon buttons, filter pills, segmented control.
+   Owns: .action .action-primary .action-quiet .icon-button .segmented .segmented-option
+   .album-filters .album-filter. Surfaces get slider-knob depth (lit top edge, faint
+   shaded bottom edge) and rings instead of borders. Hover swaps color instantly or uses
+   filter; only transform and filter ever transition. */
+
+@layer components {
+  .action { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs); min-height: var(--control-height); padding: var(--space-xs) var(--space-lg); border-radius: var(--r-control); font-size: 0.9375rem; line-height: 1.25; font-weight: 600; letter-spacing: -0.009em; transition: transform var(--duration-micro) var(--ease-smooth-out), filter var(--duration-quick) var(--ease-smooth-out); }
+  .action:active { transform: scale(var(--press-scale)); }
+  .action-primary { color: var(--on-ink); background: linear-gradient(180deg, color-mix(in srgb, var(--ink) 88%, white), var(--ink)); box-shadow: var(--knob-hi), var(--knob-lo), 0 1px 2px rgb(0 0 0 / 0.3), 0 0 0 1px rgb(0 0 0 / 0.25); }
+  .action-primary:hover { filter: brightness(1.08); }
+  .action-quiet { color: var(--ink); background: linear-gradient(180deg, var(--fill-subtle), var(--fill)); box-shadow: var(--edge-hi), var(--shadow-card); }
+  .action-quiet:hover { filter: brightness(1.12); }
+
+  .icon-button { display: inline-flex; align-items: center; justify-content: center; min-width: var(--control-height); height: var(--control-height); border-radius: var(--r-control); color: var(--ink); background: linear-gradient(180deg, var(--fill-subtle), var(--fill)); box-shadow: var(--edge-hi), var(--shadow-card); transition: transform var(--duration-micro) var(--ease-smooth-out), filter var(--duration-quick) var(--ease-smooth-out); }
+  .icon-button:hover { filter: brightness(1.12); }
+  .icon-button:active { transform: scale(var(--press-scale)); }
+  .icon-button-sm { min-width: 2rem; height: 2rem; }
+
+  /* Segmented: a recessed track with a raised pill that slides to the selection. */
+  .segmented { position: relative; display: inline-flex; align-items: center; gap: 3px; padding: 3px; border-radius: var(--r-control); background: var(--fill); box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.18), 0 0 0 1px var(--hairline); }
+  .segmented-pill { border-radius: var(--r-control); background: linear-gradient(180deg, var(--fill-strong), var(--fill-subtle)); box-shadow: var(--knob-hi), var(--shadow-float); }
+  :root[data-theme='light'] .segmented-pill { background: linear-gradient(180deg, #ffffff, #f4f4f4); }
+  .segmented-option { position: relative; z-index: 1; min-height: calc(var(--control-height) - 6px); padding-inline: var(--space-md); border-radius: var(--r-control); font-size: 0.875rem; line-height: 1.25; font-weight: 500; color: var(--text-secondary); }
+  .segmented-option:hover { color: var(--ink); }
+  .segmented-option[aria-checked='true'] { color: var(--ink); font-weight: 600; }
+  .segmented-option:focus-visible { outline-offset: 1px; }
+
+  /* Album filters stay plain pressed-state buttons (the Photos page owns the markup). */
+  .album-filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-xs); }
+  .album-filter { min-height: var(--control-height); padding-inline: var(--space-lg); border-radius: var(--r-control); color: var(--text-secondary); background: var(--fill); box-shadow: var(--shadow-card); font-size: 0.875rem; font-weight: 500; transition: transform var(--duration-micro) var(--ease-smooth-out), filter var(--duration-quick) var(--ease-smooth-out); }
+  .album-filter:hover { color: var(--ink); filter: brightness(1.12); }
+  .album-filter[aria-pressed='true'], .album-filter[aria-selected='true'] { color: var(--on-ink); font-weight: 600; background: linear-gradient(180deg, color-mix(in srgb, var(--ink) 88%, white), var(--ink)); box-shadow: var(--knob-hi), var(--knob-lo), 0 1px 2px rgb(0 0 0 / 0.3); }
+  .album-filter:active { transform: scale(var(--press-scale)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action, .icon-button, .album-filter { transition: none; }
+  .action:active, .icon-button:active, .album-filter:active { transform: none; }
+}

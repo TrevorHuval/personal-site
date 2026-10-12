@@ -12,14 +12,16 @@ import PhotoImage from './PhotoImage'
  * visual sequence.
  */
 export default function PhotoGrid({
+  className = '',
   photos,
   onSelect,
 }: {
+  className?: string
   photos: Photo[]
   onSelect: (index: number) => void
 }) {
   return (
-    <ul className="gallery-grid">
+    <ul className={`gallery-grid ${className}`}>
       {photos.map((photo, index) => (
         <li key={photo.id} className="break-inside-avoid">
           <button
@@ -27,7 +29,7 @@ export default function PhotoGrid({
             aria-label={`View photo: ${photo.caption}`}
             aria-haspopup="dialog"
             onClick={() => onSelect(index)}
-            className="gallery-photo"
+            className="gallery-photo press"
           >
             <PhotoImage
               src={photo.thumbnail}

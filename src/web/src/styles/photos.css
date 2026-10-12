@@ -1,0 +1,58 @@
+/* Photos: gallery grid, photo tiles, lightbox caption, image fade-in.
+   Owns: .gallery-grid .gallery-photo .gallery-caption* .lightbox-caption .photo-fade
+   .gallery-grid.is-out/.is-in (filter dissolve) .lightbox-photo* (photo dissolve).
+   (Filters .segmented live in controls.css; the lightbox frame lives in dialogs.css.) */
+
+@layer components {
+  .gallery-grid { columns: 3; column-gap: var(--space-lg); }
+  .gallery-grid > li { break-inside: avoid; margin-bottom: var(--space-lg); }
+
+  /* Filter dissolve. Photos.tsx adds .is-out on a click (old fades out in 100ms), swaps
+     the tiles, then .is-in (new fades in 30ms later, scaling .97 to 1 over 150ms).
+     Neither class is present on first render, so nothing plays on load. */
+  .gallery-grid.is-out { opacity: 0; pointer-events: none; transition: opacity 100ms var(--ease-smooth-out); }
+  .gallery-grid.is-in { animation: gallery-in var(--duration-quick) var(--ease-smooth-out) 30ms backwards; }
+
+  /* Tiles: --r-md corners, a ring shadow, a 2px hover lift, and the press dip. Hover is
+     excluded while pressed so the dip is the only thing that moves. */
+  .gallery-photo { display: block; width: 100%; text-align: left; border-radius: var(--r-md); overflow: hidden; background: var(--sheet); box-shadow: var(--shadow-float); }
+  .gallery-photo.press { transition-duration: var(--duration-quick); }
+  @media (hover: hover) { .gallery-photo:hover:not(:active) { transform: translateY(var(--hover-rise)); } }
+  .gallery-caption { display: flex; align-items: flex-start; gap: var(--space-sm); padding: var(--space-md); }
+  .gallery-caption-copy { display: flex; flex-direction: column; gap: var(--space-xs); }
+  .gallery-caption-title { font-size: 0.875rem; line-height: 1.4; font-weight: 500; color: var(--ink); }
+
+  .lightbox-caption { display: flex; width: 100%; align-items: center; gap: var(--space-md); padding: var(--space-xs) var(--space-xs) var(--space-xs) var(--space-lg); background: var(--sheet); border-radius: var(--r-xl); box-shadow: var(--shadow-overlay); }
+  .lightbox-caption-copy { min-width: 0; flex: 1; }
+
+  /* Lightbox photo dissolve (navigation only): the old photo fades out over 100ms
+     while the new one fades in 30ms later, scaling .97 to 1 over 150ms. */
+  .lightbox-photo { display: block; border-radius: var(--r-md); }
+  .lightbox-photo-in { animation: lightbox-in var(--duration-quick) var(--ease-smooth-out) 30ms backwards; }
+  .lightbox-photo-out { position: absolute; top: 0; left: 0; width: 100%; height: auto; pointer-events: none; animation: lightbox-out 100ms var(--ease-in-out) forwards; }
+
+  /* Images fade in as they decode; this is the only other motion on a photo. */
+  .photo-fade { opacity: 0; transition: opacity var(--duration-fast) var(--ease-smooth-out); }
+  .photo-fade[data-loaded='true'] { opacity: 1; }
+}
+
+@keyframes gallery-in { from { opacity: 0; transform: scale(var(--scale-medium)); } to { opacity: 1; transform: none; } }
+@keyframes lightbox-in { from { opacity: 0; transform: scale(var(--scale-medium)); } to { opacity: 1; transform: none; } }
+@keyframes lightbox-out { from { opacity: 1; } to { opacity: 0; } }
+
+@media (max-width: 1023px) { @layer components { .gallery-grid { columns: 2; } } }
+@media (max-width: 639px) {
+  @layer components {
+    .gallery-grid { columns: 1; }
+    .lightbox-caption { flex-wrap: wrap; gap: var(--space-xs); }
+    .lightbox-caption-copy { flex-basis: 100%; }
+    .lightbox-caption > div:last-child { margin-left: auto; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-photo, .photo-fade, .gallery-grid.is-out { transition: none !important; }
+  .gallery-grid.is-in, .lightbox-photo-in { animation: none !important; }
+  .lightbox-photo-out { display: none; }
+  .gallery-photo:hover:not(:active) { transform: none; }
+}

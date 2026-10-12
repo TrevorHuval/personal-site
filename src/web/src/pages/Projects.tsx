@@ -34,7 +34,7 @@ export default function Projects() {
         <p className="gutter-date">{presentation.projects.eyebrow}</p>
         <h1>{presentation.projects.title}</h1>
         {presentation.projects.description && (
-          <p className="max-w-[60ch] text-lg text-ink-muted">{presentation.projects.description}</p>
+          <p className="max-w-[60ch] text-base text-[var(--text-secondary)]">{presentation.projects.description}</p>
         )}
       </header>
 

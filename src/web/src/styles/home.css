@@ -1,0 +1,75 @@
+/* Home: hero, photo carousel, editorial sections (bio, skills, experience timeline wrappers).
+   Owns: .home-sections .home-hero .hero-* .carousel-caption .photo-label
+   .editorial-section .bio-copy, plus the skills/timeline card, chip and node classes. */
+
+@layer components {
+  .home-sections { display: flex; flex-direction: column; gap: var(--space-section); }
+  .home-hero { display: grid; grid-template-columns: 0.92fr 1.08fr; align-items: center; gap: var(--space-2xl); padding-block: var(--space-lg); }
+  .hero-intro { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-lg); }
+  .hero-name { max-width: 7ch; font-size: var(--text-hero); line-height: var(--hero-line-height); letter-spacing: var(--tracking-tight); font-weight: 650; }
+  .hero-description { max-width: 34ch; font-size: var(--text-lg); line-height: 1.55; color: var(--text-secondary); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+  .hero-location { margin-top: var(--space-lg); }
+
+  .hero-carousel { display: flex; flex-direction: column; gap: var(--space-sm); }
+  .hero-carousel-frame { position: relative; display: block; height: var(--hero-primary-height); overflow: clip; border-radius: var(--r-lg); background: var(--fill); box-shadow: var(--shadow-float); }
+  /* Wins over .photo-fade[data-loaded] so a loaded slide still hides until it is current.
+     Slides cross-fade only after the carousel has changed once (data-animate), so the first
+     photo appears with no animation. The frame holds still while its content changes. */
+  .hero-carousel-frame .hero-slide, .hero-carousel-frame .hero-slide[data-loaded='true'] { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: none; }
+  .hero-carousel-frame .hero-slide.is-current[data-loaded='true'] { opacity: 1; }
+  .hero-carousel[data-animate='true'] .hero-carousel-frame .hero-slide, .hero-carousel[data-animate='true'] .hero-carousel-frame .hero-slide[data-loaded='true'] { transition: opacity var(--duration-fast) var(--ease-smooth-out); }
+  .hero-carousel-controls { display: flex; align-items: center; justify-content: center; gap: var(--space-md); }
+  .hero-carousel-dots { display: flex; align-items: center; gap: var(--space-md); padding-inline: var(--space-unit); }
+  .hero-carousel-dot { position: relative; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--border); }
+  .hero-carousel-dot:hover { background: var(--text-tertiary); }
+  .hero-carousel-dot.is-current { background: var(--text-secondary); }
+  .hero-carousel-dot::before { content: ''; position: absolute; inset: -0.75rem; }
+  /* Calm selection ring: a thin ring with a gap that opens out from the dot's edge. */
+  .hero-carousel-dot::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; box-shadow: 0 0 0 1.5px var(--text-tertiary); opacity: 0; transform: scale(0.6); transition: opacity var(--duration-quick) var(--ease-smooth-out), transform var(--duration-quick) var(--ease-smooth-out); pointer-events: none; }
+  .hero-carousel-dot.is-current::after { opacity: 1; transform: scale(1); }
+  .photo-label { position: absolute; inset: auto var(--space-sm) var(--space-sm); display: flex; align-items: center; gap: var(--space-xs); border-radius: var(--r-md); padding: var(--space-sm); font-size: var(--text-caption); color: var(--ink); }
+  .photo-label > span:nth-child(2) { flex: 1; }
+
+  .editorial-section { display: grid; grid-template-columns: minmax(12rem, 0.8fr) minmax(0, 1.8fr); gap: var(--space-2xl); border-top: 1px solid var(--hairline); padding-top: var(--space-2xl); }
+  .editorial-section > header { align-self: start; }
+  .bio-copy { display: flex; flex-direction: column; gap: var(--space-lg); max-width: 65ch; font-size: var(--text-lg); line-height: 1.55; color: var(--text-secondary); }
+
+  /* Cards (skills, timeline): --sheet surface, --r-lg, float shadow. Type per the scale:
+     title 16/600 strong, body 14, chips 12 on a --fill pill. */
+  .skill-card, .timeline-card { background: var(--sheet); border-radius: var(--r-lg); box-shadow: var(--shadow-float); padding: var(--space-lg); }
+  .card-title { font-size: 1rem; line-height: 1.5rem; font-weight: 600; letter-spacing: -0.011em; color: var(--ink); }
+  .card-body { font-size: 0.875rem; line-height: 1.3125rem; letter-spacing: -0.006em; color: var(--text-secondary); }
+  .chip-list { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+  .chip { display: inline-flex; align-items: center; min-height: 1.75rem; padding-inline: var(--space-sm); border-radius: var(--r-control); background: var(--fill); font-size: 0.75rem; line-height: 1.05rem; font-weight: 500; color: var(--text-secondary); }
+  .timeline-node { position: absolute; top: 1.9rem; left: -5px; width: 0.625rem; height: 0.625rem; border-radius: 50%; border: 1px solid var(--border); background: var(--frame); box-shadow: 0 0 0 4px var(--frame); }
+  .timeline-node.is-current { border-color: transparent; background: var(--color-accent); }
+  .bullet-dot { flex-shrink: 0; width: 4px; height: 4px; margin-top: 0.55rem; border-radius: 50%; background: var(--text-tertiary); }
+}
+
+@media (min-width: 1440px) { @layer components { .hero-carousel-frame { height: 34rem; } } }
+@media (max-width: 1023px) {
+  @layer components {
+    .home-hero { gap: var(--space-lg); }
+    .hero-name { font-size: clamp(2.75rem, 8vw, 4.5rem); }
+    .hero-carousel-frame { height: 29rem; }
+    .editorial-section { grid-template-columns: 1fr; gap: var(--space-xl); }
+  }
+}
+@media (max-width: 639px) {
+  @layer components {
+    .home-hero { grid-template-columns: 1fr; gap: var(--space-xl); padding-top: var(--space-md); }
+    .hero-name { max-width: none; font-size: clamp(2.5rem, 12vw, 3.5rem); }
+    .hero-location { display: none; }
+    .hero-carousel-frame { height: 22rem; }
+    .skill-card, .timeline-card { padding: var(--space-md); }
+    .timeline-node { top: 1.45rem; }
+    .photo-label { inset: auto var(--space-xs) var(--space-xs); padding: var(--space-xs); gap: var(--space-unit); }
+    .photo-label > .gutter-date, .photo-label > svg { display: none; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide, .hero-carousel-dot::after { transition: none !important; }
+  .hero-carousel-dot::after { transform: none; }
+}

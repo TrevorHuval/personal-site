@@ -1,0 +1,72 @@
+/* Motion tokens and reusable recipes, after transitions.dev.
+   Rules: animate only opacity, transform, filter and grid-template-rows (the segmented
+   pill also tweens width, as in the reference recipe). Nothing plays on mount or load:
+   every recipe is a state change the user triggers by toggling a class or attribute.
+   Closing is never slower than opening. Reduced motion jumps to the final state. */
+
+:root {
+  /* Durations */
+  --duration-stagger: 40ms;
+  --duration-micro: 80ms;
+  --duration-quick: 150ms;
+  --duration-fast: 250ms;
+  --duration-medium: 350ms;
+  --duration-slow: 400ms;
+  --duration-very-slow: 500ms;
+  /* Easings */
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: ease-in-out;
+  --ease-out: ease-out;
+  --ease-linear: linear;
+  --ease-bounce: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --ease-bounce-strong: cubic-bezier(0.34, 3.85, 0.64, 1);
+  /* Distances, scales, blur */
+  --distance-micro: 4px;
+  --distance-base: 8px;
+  --scale-large: 0.96;
+  --scale-medium: 0.97;
+  --scale-tiny: 0.99;
+  --blur-small: 2px;
+  /* Recipe variables */
+  --dialog-open-dur: 200ms;
+  --dialog-close-dur: 150ms;
+  --menu-open-dur: 250ms;
+  --menu-close-dur: 150ms;
+  --seg-dur: 250ms;
+}
+
+@layer components {
+  /* Press: a dip to 97% and nothing else. */
+  .press { transition: transform var(--duration-micro) var(--ease-smooth-out); }
+  .press:active { transform: scale(var(--press-scale)); }
+
+  /* Dissolve: toggle .is-in to fade (with a 2px blur) content in place. */
+  .dissolve { opacity: 0; filter: blur(var(--blur-small)); transition: opacity var(--duration-quick) var(--ease-in-out), filter var(--duration-quick) var(--ease-in-out); }
+  .dissolve.is-in { opacity: 1; filter: none; }
+
+  /* Dialog: toggle .is-open to open; add .is-closing for the (shorter) exit. */
+  .dialog-motion { opacity: 0; transform: scale(var(--scale-large)); transition: opacity var(--dialog-close-dur) var(--ease-smooth-out), transform var(--dialog-close-dur) var(--ease-smooth-out); }
+  .dialog-motion.is-open { opacity: 1; transform: scale(1); transition-duration: var(--dialog-open-dur); }
+  .dialog-motion.is-closing { opacity: 0; transform: scale(var(--scale-large)); transition-duration: var(--dialog-close-dur); }
+  .dialog-motion::backdrop { opacity: 0; transition: opacity var(--dialog-close-dur) var(--ease-smooth-out); }
+  .dialog-motion.is-open::backdrop { opacity: 1; transition-duration: var(--dialog-open-dur); }
+  .dialog-motion.is-closing::backdrop { opacity: 0; }
+
+  /* Menu: toggle .is-open; .is-closing is the quicker, slightly smaller exit. */
+  .menu-motion { transform-origin: top left; transform: scale(var(--scale-medium)); opacity: 0; pointer-events: none; transition: transform var(--menu-open-dur) var(--ease-smooth-out), opacity var(--menu-open-dur) var(--ease-smooth-out); }
+  .menu-motion[data-origin='top-right'] { transform-origin: top right; }
+  .menu-motion[data-origin='bottom-left'] { transform-origin: bottom left; }
+  .menu-motion[data-origin='bottom-right'] { transform-origin: bottom right; }
+  .menu-motion.is-open { transform: scale(1); opacity: 1; pointer-events: auto; }
+  .menu-motion.is-closing { transform: scale(var(--scale-tiny)); opacity: 0; pointer-events: none; transition-duration: var(--menu-close-dur); }
+
+  /* Segmented sliding indicator. Position and width are written inline by Segmented;
+     data-ready is set after the first measurement so the pill never slides on mount. */
+  .segmented-pill { position: absolute; top: 3px; left: 0; width: 0; height: calc(100% - 6px); transform: translateX(0); pointer-events: none; z-index: 0; }
+  .segmented[data-ready='true'] .segmented-pill { transition: transform var(--seg-dur) var(--ease-smooth-out), width var(--seg-dur) var(--ease-smooth-out); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .press, .dissolve, .dialog-motion, .dialog-motion::backdrop, .menu-motion, .segmented-pill { transition: none !important; }
+  .press:active { transform: none; }
+}

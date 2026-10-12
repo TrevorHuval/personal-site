@@ -1,0 +1,21 @@
+/* Dialogs. The resume dialog and lightbox share this native-dialog treatment.
+   Owns: .dialog (full-viewport transparent shell with a dimmed backdrop), .dialog-sheet
+   (the raised surface inside it), .resume-bar, .resume-frame, .lightbox-frame.
+   Pair with .dialog-motion from transitions.css for the open (200ms) / close (150ms)
+   recipe; components/ResumeDialog.tsx (useDialogMotion) toggles .is-open / .is-closing. */
+
+@layer components {
+  .dialog { margin: 0; width: 100dvw; height: 100dvh; max-width: none; max-height: none; padding: var(--space-md); background: transparent; color: var(--text); }
+  .dialog::backdrop { background: var(--color-scrim); backdrop-filter: blur(12px); }
+  .dialog-sheet { background: var(--sheet); border-radius: var(--r-xl); box-shadow: var(--shadow-overlay); padding: var(--space-lg); }
+
+  /* Resume: a header bar with one primary action, over a sheet holding the PDF. */
+  .resume-bar { display: flex; flex-shrink: 0; align-items: center; gap: var(--space-md); padding: var(--space-xs) var(--space-xs) var(--space-xs) var(--space-lg); background: var(--sheet); border-radius: var(--r-xl); box-shadow: var(--shadow-overlay); }
+  .resume-frame { flex: 1 1 0%; min-height: 0; overflow: hidden; padding: 0.5rem; background: var(--sheet); border-radius: var(--r-xl); box-shadow: var(--shadow-overlay); }
+
+  /* Lightbox photo frame. 8px padding + --r-md photo = concentric with --r-xl. */
+  .lightbox-frame { overflow: hidden; padding: 0.5rem; background: var(--sheet); border-radius: var(--r-xl); box-shadow: var(--shadow-overlay); }
+}
+
+@media (min-width: 640px) { @layer components { .dialog { padding: var(--space-xl); } } }
+@media (max-width: 479px) { @layer components { .resume-bar .gutter-date { display: none; } } }

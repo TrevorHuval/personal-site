@@ -1,0 +1,29 @@
+/* Projects. Owns: .project-card .project-title .project-tags .project-tag .project-stat
+   .resume-sheet. Cards are sheet surfaces with a ring-and-drop shadow. On hover they lift
+   by 2px (transform only, pointer devices only); links inside are quiet pill controls. */
+
+@layer components {
+  .project-card { display: flex; flex-direction: column; padding: var(--space-xl); gap: var(--space-lg); border-radius: var(--r-lg); background: var(--sheet); box-shadow: var(--shadow-float); transition: transform var(--duration-quick) var(--ease-smooth-out); }
+  .project-title { font-size: 1rem; line-height: 1.3; font-weight: 600; letter-spacing: var(--tracking-heading); color: var(--ink); }
+  .project-card p { font-size: 0.9375rem; line-height: 1.5; }
+  .project-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .project-tag { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--r-control); background: var(--fill); color: var(--text-secondary); font-size: 0.75rem; line-height: 1.4; font-weight: 500; }
+  .project-stat { font-size: 0.8125rem; line-height: 1.4; font-weight: 500; color: var(--text-secondary); }
+  .project-card footer { border-top: 1px solid var(--hairline); }
+  .project-card footer a.action { min-height: 2rem; padding-inline: var(--space-md); font-size: 0.8125rem; font-weight: 500; }
+
+  /* Résumé sections that sit on a sheet (education entries). */
+  .resume-sheet { padding: var(--space-lg) var(--space-xl); border-radius: var(--r-lg); background: var(--sheet); box-shadow: var(--shadow-float); }
+}
+
+@media (hover: hover) {
+  @layer components { .project-card:hover { transform: translateY(-2px); } }
+}
+
+@media (max-width: 639px) {
+  @layer components { .project-card { padding: var(--space-lg); } .resume-sheet { padding: var(--space-lg); } }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @layer components { .project-card { transition: none; } .project-card:hover { transform: none; } }
+}
