@@ -98,6 +98,5 @@ Google Analytics tag. Unset, no tag is emitted. The tag is skipped for Do Not
 Track visitors, runs with Google Signals and ad personalization off, and the
 `/studio` route is never reported. In CI the ID is set in the image workflow's build args.
 
-The build also writes `404.html` as a byte-for-byte copy of `index.html` for
-compatibility with static hosts. Production uses nginx on EC2: its SPA fallback
-serves `index.html` for routes such as `/resume`, rather than relying on GitHub Pages.
+Production uses nginx on EC2: its SPA fallback serves `index.html` for routes
+such as `/resume`.

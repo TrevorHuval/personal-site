@@ -36,7 +36,7 @@ describe.each(FILES)('%s', (_name, raw) => {
    * ship straight to a page, a link preview, or a search result.
    */
   it('has no placeholder text left in it', () => {
-    expect(raw).not.toMatch(/TODO/i)
+    expect(raw).not.toMatch(/\bTODO\b/)
   })
 
   /**

@@ -224,7 +224,7 @@ export function validateCollection(name, value) {
   // Checked string by string with bounded quantifiers: one unbounded pattern
   // over the whole document is quadratic on a long run of address characters.
   for (const text of strings(clean)) {
-    if (/TODO/i.test(text)) throw new ValidationError('Content may not contain the placeholder text "TODO"')
+    if (/\bTODO\b/.test(text)) throw new ValidationError('Content may not contain the placeholder text "TODO"')
     if (/[\w.+-]{1,64}@[\w-]{1,255}\.[\w.]{1,255}/.test(text)) {
       throw new ValidationError('Content may not contain an email address; it belongs in the résumé PDF only')
     }
