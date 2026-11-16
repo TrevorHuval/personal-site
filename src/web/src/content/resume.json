@@ -7,15 +7,15 @@
       "startDate": "2023-05",
       "endDate": null,
       "highlights": [
-        "Course Offerings site. Built LSU's public course catalog in .NET with the University Registrar, retiring a legacy system; it now serves 4,500+ monthly users. Designed its many-to-many SQL Server schema and tuned indexing with the DBAs.",
-        "Mainframe migration lead. Led LSU's DB2 mainframe decommissioning: designed the cutover with a parallel-run rollback and migrated 164 SQL views and stored procedures across three production apps. Wrote the playbook two engineers used to migrate two more.",
-        "Shared platform code. Built the Azure AD impersonation feature in LsuInfrastructureMVC, the internal .NET package LSU's web apps depend on, then rolled the new version out and regression tested it across every dependent application.",
-        "Workday Extend app. Built a course-certification web app for faculty, one of the first LSU put into production, and retired the legacy system behind it. Later added an assessment component admins configure without a deploy.",
-        "CKEditor 5 rewrite. Ported all 8 custom JavaScript/TypeScript editor plugins to CKEditor 5 for LSU's knowledge base (70K monthly visitors) with zero feature regressions, and made the full suite keyboard accessible to WCAG.",
-        "PHP to .NET 10. Rewrote a PHP inventory app in .NET 10 / ASP.NET Core with xUnit coverage, and moved LSU's campus-wide software distribution platform onto Azure AD / Entra ID SSO with SP-initiated SAML Single Logout.",
-        "Java and Spring Boot. Diagnosed a Tomcat 10 caching regression slowing every Spring app on the platform and shipped the fix, and patched an Apache Struts CVE across 10 Java apps.",
-        "Product ownership. Run requirements sessions and demos with the Registrar, Procurement, and academic offices; drive UAT through dev/QA/prod gates and schedule releases around course, inventory, and budget cycles.",
-        "Production support. Root-cause and fix authentication, data, and session bugs across 25+ enterprise web systems, and regression test every quarterly platform release."
+        "Sole developer of LSU's public .NET/SQL Server course browser (4.5K+ monthly users), taking it from Registrar mockups through feedback cycles and sign-off to production.",
+        "Redesigned the course browser's schedule data as a many-to-many model with the BI and DBA teams so sections with multiple meeting times display in full; let the Registrar set how far ahead courses publish.",
+        "Led migration of budget, inventory, and procurement applications off a DB2 mainframe, converting 164 SQL views and stored procedures to Workday-sourced data; all three live in 2025.",
+        "Ran old and new workflows side by side so any cutover could be reversed immediately, took the procurement app through user acceptance testing, then mentored two engineers through migrating two more apps.",
+        "Moved LSU's software download site to Entra ID SSO with SAML logout; built user impersonation into LSU's shared .NET library and dependent apps, so developers troubleshoot by seeing what a user sees.",
+        "Added xUnit unit tests for models, mappers, and view models to the course browser and inventory .NET rewrite.",
+        "Introduced Claude Code to the development team and wrote its shared setup and guidance; applied it with custom subagents and skills to the inventory .NET rewrite and a new Workday Extend app.",
+        "Replaced a legacy faculty-certification app with Workday Extend, prototype to production in 5 months; gathered requirements with program staff and made assessment questions editable without a deployment.",
+        "Rebuilt 7 JavaScript/TypeScript CKEditor 5 plugins for LSU's knowledge base editor (70K monthly visitors), adding keyboard navigation for accessibility."
       ],
       "tech": [
         "C#",
@@ -25,7 +25,8 @@
         "Java / Spring Boot",
         "Entity Framework Core",
         "Azure AD / Entra ID",
-        "Workday Extend"
+        "Workday Extend",
+        "Claude Code"
       ]
     },
     {
@@ -35,7 +36,7 @@
       "startDate": "2021-11",
       "endDate": "2023-05",
       "highlights": [
-        "Built the TigerCard Photo REST API and implemented Spring OAuth2 authentication for campus Java applications."
+        "Implemented Spring OAuth2 authentication for Java applications and integrated the TigerCard Photo API."
       ],
       "tech": ["Java", "Spring Boot", "OAuth 2.0", "REST APIs"]
     },
@@ -46,10 +47,9 @@
       "startDate": "2022-05",
       "endDate": "2022-08",
       "highlights": [
-        "Automated a time-sensitive process for the Emerging Technology team, saving them 2+ hours a week.",
-        "Built reusable GitLab CI/CD pipeline templates with Docker for the team's build and deploy workflow."
+        "Built reusable GitLab CI/CD templates with Docker and a Python tool that turned GitLab KPI data into Scrum metrics for the project manager, replacing manual tracking and saving 2+ hours weekly."
       ],
-      "tech": ["Docker", "GitLab CI/CD", "Automation"]
+      "tech": ["Docker", "GitLab CI/CD", "Python"]
     }
   ],
   "education": [
