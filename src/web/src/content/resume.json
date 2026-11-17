@@ -13,7 +13,7 @@
         "Ran old and new workflows side by side so any cutover could be reversed immediately, took the procurement app through user acceptance testing, then mentored two engineers through migrating two more apps.",
         "Moved LSU's software download site to Entra ID SSO with SAML logout; built user impersonation into LSU's shared .NET library and dependent apps, so developers troubleshoot by seeing what a user sees.",
         "Added xUnit unit tests for models, mappers, and view models to the course browser and inventory .NET rewrite.",
-        "Introduced Claude Code to the development team and wrote its shared setup and guidance; applied it with custom subagents and skills to the inventory .NET rewrite and a new Workday Extend app.",
+        "Shared Claude Code best practices with coworkers and built a custom Claude Code skill for Workday Extend app development.",
         "Replaced a legacy faculty-certification app with Workday Extend, prototype to production in 5 months; gathered requirements with program staff and made assessment questions editable without a deployment.",
         "Rebuilt 7 JavaScript/TypeScript CKEditor 5 plugins for LSU's knowledge base editor (70K monthly visitors), adding keyboard navigation for accessibility."
       ],
