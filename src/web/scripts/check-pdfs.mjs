@@ -26,7 +26,7 @@ const publicDir = path.resolve(scriptDir, '..', 'public')
 /* Deliberately generic. The point is to catch *a* contact detail, not to write
    Trevor's own details into a file in a public repository.
 
-   The phone pattern requires punctuation — `(337) 351-6364` or `337-351-6364`,
+   The phone pattern requires punctuation — `(555) 555-0123` or `555-555-0123`,
    not three space-separated runs of digits. A PDF content stream is full of
    space-separated numbers (positions, kerning, font metrics) and a looser
    pattern matches page coordinates on every well-formed file. */
@@ -68,7 +68,7 @@ const ESCAPES = { n: '\n', r: '\r', t: '\t', b: '\b', f: '\f' }
  *
  * The octal form matters more than it looks: TeX writes the parentheses of a
  * phone number as `\050` and `\051`, so a decoder that only understands `\(`
- * and `\)` leaves `(337) 351-6364` looking like `\050337\051351-6364` and no
+ * and `\)` leaves `(555) 555-0123` looking like `\050555\051555-0123` and no
  * phone pattern will ever match it.
  */
 function unescapePdfString(raw) {

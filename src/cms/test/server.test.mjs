@@ -209,6 +209,30 @@ describe('content', () => {
   })
 })
 
+describe('response headers', () => {
+  // The API shares its origin with the studio, so a response opened as a page
+  // must not be able to run script or be framed.
+  it('locks down every kind of API answer', async () => {
+    const content = await call('GET', `${API}/content`)
+    const answers = [
+      await call('GET', `${API}/health`),
+      content,
+      await call('GET', `${API}/content`, { headers: { 'If-None-Match': content.response.headers.get('etag') } }),
+      await call('GET', `${API}/session`),
+      await call('GET', `${API}/nothing-here`),
+      await call('GET', '/media/photos/missing.jpg'),
+      await call('PUT', `${API}/content/profile`, { body: {}, headers: { 'If-Match': 'none' } }),
+    ]
+    assert.deepEqual(answers.map((a) => a.status), [200, 200, 304, 200, 401, 404, 401])
+    for (const { response } of answers) {
+      assert.equal(response.headers.get('content-security-policy'), "default-src 'none'; frame-ancestors 'none'")
+    }
+    for (const { response } of answers.filter((a) => a.status !== 304)) {
+      assert.equal(response.headers.get('x-content-type-options'), 'nosniff')
+    }
+  })
+})
+
 describe('photos', () => {
   it('turns an upload into the four derivatives, then publishes it with its words', async () => {
     const cookie = await signIn()
@@ -229,6 +253,8 @@ describe('photos', () => {
       assert.equal(file.status, 200, url)
       assert.match(file.headers.get('cache-control'), /immutable/)
       assert.match(file.headers.get('content-type'), /^image\/(jpeg|avif)$/)
+      assert.equal(file.headers.get('x-content-type-options'), 'nosniff')
+      assert.equal(file.headers.get('content-security-policy'), "default-src 'none'; frame-ancestors 'none'")
     }
 
     const list = [

@@ -130,7 +130,7 @@ function personSchema(
   // answer, and the résumé already knows it.
   const jobTitle = real(resume.experience.find((role) => role.endDate === null)?.title ?? '')
 
-  return JSON.stringify({
+  return jsonForScript({
     '@context': 'https://schema.org',
     '@type': 'Person',
     name: profile.name,
@@ -140,6 +140,15 @@ function personSchema(
     ...(sameAs.length === 0 ? {} : { sameAs }),
     ...(siteUrl === '' ? {} : { url: siteUrl, image: `${siteUrl}/og.png` }),
   })
+}
+
+/**
+ * JSON that is safe inside a `<script>` element. `JSON.stringify` leaves `<`
+ * alone, so a value containing `</script>` would end the block early and the
+ * rest of the string would be parsed as markup.
+ */
+export function jsonForScript(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')
 }
 
 /**
