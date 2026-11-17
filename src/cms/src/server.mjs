@@ -24,6 +24,13 @@ const COOKIE = 'studio_session'
 const MEDIA_PATH = /^\/media\/photos\/(?:thumbs\/)?[a-z0-9][a-z0-9._-]*\.(?:jpg|avif)$/
 const JSON_LIMIT = 2 * 1024 * 1024
 const MIME = { '.jpg': 'image/jpeg', '.avif': 'image/avif' }
+/**
+ * Nothing this service answers with is a document. If a response is ever opened
+ * as one (a browser navigating straight to an API or photo URL), this policy
+ * keeps it inert: no script, no subresources, no framing. The service shares
+ * its origin with the studio, so that matters more than it would on its own host.
+ */
+const LOCKED_DOWN = { 'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'" }
 
 class HttpError extends Error {
   constructor(status, message, headers = {}) {
@@ -137,7 +144,7 @@ export async function createApp(config) {
     }
     const { body, etag } = contentCache
     if (req.headers['if-none-match'] === etag) {
-      res.writeHead(304, { ETag: etag, 'Cache-Control': 'no-cache' })
+      res.writeHead(304, { ETag: etag, 'Cache-Control': 'no-cache', ...LOCKED_DOWN })
       return res.end()
     }
     send(res, 200, body, { ETag: etag, 'Cache-Control': 'no-cache' }, true)
@@ -152,6 +159,7 @@ export async function createApp(config) {
         // Every upload gets a fresh random id, so a given URL never changes.
         'Cache-Control': 'public, max-age=31536000, immutable',
         'X-Content-Type-Options': 'nosniff',
+        ...LOCKED_DOWN,
       })
       // pipeline() closes the file when the client disconnects mid-download;
       // a bare pipe() would leak one descriptor per aborted request.
@@ -339,6 +347,7 @@ function send(res, status, body, headers = {}, preSerialised = false) {
     'Content-Type': 'application/json; charset=utf-8',
     'Content-Length': Buffer.byteLength(text),
     'X-Content-Type-Options': 'nosniff',
+    ...LOCKED_DOWN,
     // Only the public content route overrides this; nothing else may be cached.
     'Cache-Control': 'no-store',
     ...headers,
