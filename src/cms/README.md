@@ -45,13 +45,12 @@ that are gone.
   Plannit, Heardit or MusiQL pages. Logging out revokes it, and the revocation is
   saved in `DATA_DIR`, so a restart does not revive it. Changing the password
   invalidates every session.
-- **Known limitation: sibling apps share the origin.** The cookie path does not
-  stop *script* running on `trevorhuval.com/plannit` (or heardit/musiql) from
-  calling `/api/cms/…`: the browser attaches the cookie to any same-origin
-  request to that path. An XSS or compromised dependency in one of those apps,
-  during a live session, could publish content as you. The real fix is serving
-  the studio from its own origin (for example `studio.trevorhuval.com`); sign out
-  when you finish editing to shrink the window.
+- **Sibling apps run on other origins.** Plannit, Heardit, MusiQL and FlightWall
+  are served from their own subdomains (`plannit.trevorhuval.com` and so on), so
+  script running in one of them cannot make same-origin requests to `/api/cms/…`
+  or read the studio's pages. The session cookie has no `Domain` attribute, so
+  browsers never send it to those subdomains. Anything added back under a path of
+  `trevorhuval.com` would share the studio's origin again.
 - **Writes** additionally require an `Origin` header from the site's own origin,
   and a content write must carry the revision the editor last saw (`If-Match`),
   so a stale tab cannot overwrite newer work.

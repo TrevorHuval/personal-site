@@ -13,15 +13,15 @@
   "quickLinks": [
     {
       "label": "Heardit",
-      "href": "https://trevorhuval.com/heardit"
+      "href": "https://heardit.trevorhuval.com"
     },
     {
       "label": "Plannit",
-      "href": "https://trevorhuval.com/plannit"
+      "href": "https://plannit.trevorhuval.com"
     },
     {
       "label": "MusiQL",
-      "href": "https://trevorhuval.com/musiql"
+      "href": "https://musiql.trevorhuval.com"
     }
   ]
 }
