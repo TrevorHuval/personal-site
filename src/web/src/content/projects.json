@@ -13,7 +13,7 @@
       "Docker"
     ],
     "repoSlug": "TrevorHuval/musiql",
-    "liveUrl": "https://trevorhuval.com/musiql",
+    "liveUrl": "https://musiql.trevorhuval.com",
     "order": 1
   },
   {
@@ -31,7 +31,7 @@
       "Docker"
     ],
     "repoSlug": "TrevorHuval/Plannit",
-    "liveUrl": "https://trevorhuval.com/plannit",
+    "liveUrl": "https://plannit.trevorhuval.com",
     "order": 2
   },
   {
@@ -47,7 +47,7 @@
       "Docker Compose"
     ],
     "repoSlug": "TrevorHuval/Heardit",
-    "liveUrl": "https://trevorhuval.com/heardit",
+    "liveUrl": "https://heardit.trevorhuval.com",
     "order": 3
   },
   {
