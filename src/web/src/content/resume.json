@@ -13,7 +13,7 @@
         "Ran old and new workflows side by side so any cutover could be reversed immediately, took the procurement app through user acceptance testing, then mentored two engineers through migrating two more apps.",
         "Moved LSU's software download site to Entra ID SSO with SAML logout; built user impersonation into LSU's shared .NET library and dependent apps, so developers troubleshoot by seeing what a user sees.",
         "Added xUnit unit tests for models, mappers, and view models to the course browser and inventory .NET rewrite.",
-        "Shared Claude Code best practices with coworkers and built a custom Claude Code skill for Workday Extend app development.",
+        "Built a custom Claude Code skill for Workday Extend development and presented it to a 100+ person IT department, teaching a repeatable method for building skills for other applications.",
         "Replaced a legacy faculty-certification app with Workday Extend, prototype to production in 5 months; gathered requirements with program staff and made assessment questions editable without a deployment.",
         "Rebuilt 7 JavaScript/TypeScript CKEditor 5 plugins for LSU's knowledge base editor (70K monthly visitors), adding keyboard navigation for accessibility."
       ],
@@ -38,7 +38,12 @@
       "highlights": [
         "Implemented Spring OAuth2 authentication for Java applications and integrated the TigerCard Photo API."
       ],
-      "tech": ["Java", "Spring Boot", "OAuth 2.0", "REST APIs"]
+      "tech": [
+        "Java",
+        "Spring Boot",
+        "OAuth 2.0",
+        "REST APIs"
+      ]
     },
     {
       "company": "Tyson Foods IT",
@@ -49,7 +54,11 @@
       "highlights": [
         "Built reusable GitLab CI/CD templates with Docker and a Python tool that turned GitLab KPI data into Scrum metrics for the project manager, replacing manual tracking and saving 2+ hours weekly."
       ],
-      "tech": ["Docker", "GitLab CI/CD", "Python"]
+      "tech": [
+        "Docker",
+        "GitLab CI/CD",
+        "Python"
+      ]
     }
   ],
   "education": [
