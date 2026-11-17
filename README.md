@@ -8,7 +8,12 @@ served by nginx in a Docker container on trevorhuval.com. The public site is sta
 The only server-side piece is the optional owner-only `/studio` editor, whose API lives in
 [`src/cms`](src/cms/README.md) and is deployed as its own service; the site works without it.
 
-Deployment and server operations are documented in the private `trevorhuval-infra` repo.
+The portfolio apps are not part of this repo: MusiQL, Heardit, Plannit and FlightWall
+run from their own repos on subdomains (`musiql.`, `heardit.`, `plannit.`, `flightwall.trevorhuval.com`),
+and the project cards link to them there. Only the studio stays on the main site, at `/studio`.
+
+Deployment and server operations (including deploys, backups and hardening) are documented in
+the private `trevorhuval-infra` repo, not here.
 
 ## Layout
 
@@ -100,3 +105,14 @@ Track visitors, runs with Google Signals and ad personalization off, and the
 
 Production uses nginx on EC2: its SPA fallback serves `index.html` for routes
 such as `/resume`.
+
+## CI and the resume PDF
+
+`.github/workflows/image.yml` runs on every push to `main`: lint, tests and
+`npm run check:pdfs` for the site, then publishes multi-arch images to GHCR
+(`personal-site` and `personal-site-cms`, the studio API built from `src/cms`).
+
+`src/web/public/trevor_huval_resume.pdf` is the public (contact-free) PDF built
+from the separate Resume repo and committed here by a sync from that repo, not
+edited by hand. `npm run check:pdfs` fails the build if any PDF in `public/`
+contains an email address or phone number.
